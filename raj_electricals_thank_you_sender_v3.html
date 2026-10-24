@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Raj Electricals - Thank You Sender</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f5f7;margin:0;color:#202124}header{background:#b71c1c;color:white;padding:20px}main{max-width:850px;margin:20px auto;padding:0 12px;display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{background:white;padding:18px;border-radius:12px;border:1px solid #ddd}h1{font-size:23px;margin:0}h2{font-size:18px;margin-top:0}label{display:block;font-weight:bold;font-size:14px;margin:13px 0 6px}input,textarea{width:100%;box-sizing:border-box;border:1px solid #bbb;border-radius:7px;padding:12px;font:inherit}textarea{min-height:65px}button,.button{display:block;width:100%;box-sizing:border-box;border:0;border-radius:8px;padding:14px;margin-top:12px;font-size:15px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}.send{background:#168447;color:white}.copy{background:#eceff1;color:#222}.preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f8fa;border:1px solid #ddd;padding:13px;border-radius:8px;min-height:200px;line-height:1.5}.hint{font-size:12px;color:#666;line-height:1.5}#status{font-size:13px;margin-top:10px;line-height:1.5}.offers{margin-top:15px;border-top:1px solid #ddd;padding-top:12px} @media(max-width:650px){main{grid-template-columns:1fr}header h1{font-size:20px}}
+</style>
+</head>
+<body>
+<header><h1>RAJ ELECTRICALS</h1><div>Customer Thank You & Offers Sender</div></header>
+<main>
+<section class="card">
+<h2>Customer details</h2>
+<label for="customer">Customer name</label><input id="customer" placeholder="Enter customer name">
+<label for="mobile">WhatsApp mobile number</label><input id="mobile" type="tel" inputmode="numeric" placeholder="10-digit Indian number">
+<p class="hint">Enter the customer's 10-digit Indian mobile number.</p>
+<a class="button send" id="sendLink" href="https://wa.me/" target="_blank" rel="noopener">Open WhatsApp Message</a>
+<button type="button" class="copy" id="copyBtn">Copy Message</button>
+<div id="status" aria-live="polite">Enter the details above. The preview updates automatically.</div>
+<div class="offers">
+<h2>Ongoing offers (editable)</h2>
+<label for="offer1">Offer 1</label><textarea id="offer1">Get a FREE 9W LED bulb on the purchase of any fan.</textarea>
+<label for="offer2">Offer 2</label><textarea id="offer2">Get a FREE extension box on the purchase of any press.</textarea>
+<label for="offer3">Offer 3</label><textarea id="offer3">Shop for ₹3,000 or more and get a scratch card with a chance to win exciting rewards.</textarea>
+</div>
+</section>
+<section class="card">
+<h2>Message preview</h2>
+<div id="preview" class="preview">Your message preview will appear here.</div>
+<p class="hint">Tap “Open WhatsApp Message” to open the chat with the message filled in. You must tap Send in WhatsApp.</p>
+</section>
+</main>
+<script>
+(function(){
+ const byId = function(id){ return document.getElementById(id); };
+ function getMessage(){
+   var customer = byId('customer').value.trim() || '[Customer name]';
+   var offers = [1,2,3].map(function(n){return byId('offer'+n).value.trim();}).filter(function(v){return v.length>0;});
+   return 'Dear '+customer+',\n\nThank you for shopping with Raj Electricals! 🙏\n\nWe truly appreciate your trust and support. We look forward to serving you again.\n\n🎁 ONGOING OFFERS\n'+offers.map(function(v,i){return (i+1)+'. '+v;}).join('\n')+'\n\nFor details, please contact Raj Electricals.\n\nRegards,\nTeam Raj Electricals';
+ }
+ function refresh(){
+   byId('preview').textContent = getMessage();
+   var number = byId('mobile').value.replace(/\D/g,'');
+   if(number.indexOf('91')===0 && number.length===12) number=number.slice(2);
+   var valid = /^[6-9][0-9]{9}$/.test(number);
+   var url = valid ? 'https://wa.me/91'+number+'?text='+encodeURIComponent(getMessage()) : 'https://wa.me/';
+   byId('sendLink').href = url;
+   byId('sendLink').setAttribute('aria-disabled', valid ? 'false':'true');
+ }
+ ['customer','mobile','offer1','offer2','offer3'].forEach(function(id){
+   byId(id).addEventListener('input',refresh);
+   byId(id).addEventListener('change',refresh);
+ });
+ byId('sendLink').addEventListener('click',function(e){
+   var number=byId('mobile').value.replace(/\D/g,'');
+   if(number.indexOf('91')===0 && number.length===12) number=number.slice(2);
+   if(!byId('customer').value.trim()){
+     e.preventDefault();byId('status').textContent='Please enter the customer name.';byId('customer').focus();return;
+   }
+   if(!/^[6-9][0-9]{9}$/.test(number)){
+     e.preventDefault();byId('status').textContent='Please enter a valid 10-digit Indian mobile number.';byId('mobile').focus();return;
+   }
+   byId('status').textContent='WhatsApp is opening in a new tab or app. Tap Send inside WhatsApp.';
+ });
+ byId('copyBtn').addEventListener('click',function(){
+   var text=getMessage();
+   // Clipboard API can fail in local HTML files, so use a selectable text area fallback.
+   var area=document.createElement('textarea');area.value=text;area.setAttribute('readonly','');
+   area.style.position='fixed';area.style.left='-9999px';document.body.appendChild(area);area.select();
+   var copied=false;try{copied=document.execCommand('copy');}catch(e){}
+   area.remove();
+   if(copied){byId('status').textContent='Message copied. Paste it into WhatsApp.';}
+   else{
+     byId('preview').focus;
+     var range=document.createRange();range.selectNodeContents(byId('preview'));
+     var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+     byId('status').textContent='Message text selected. Use Copy, then paste into WhatsApp.';
+   }
+ });
+ refresh();
+})();
+</script>
+</body>
+</html>
